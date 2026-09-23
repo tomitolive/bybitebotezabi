@@ -10,29 +10,42 @@
         h1 { color: #38bdf8; }
         .price { font-size: 24px; color: #4ade80; font-weight: bold; }
         .analysis { background: #334155; padding: 15px; border-radius: 8px; margin-top: 15px; text-align: left; direction: ltr; }
+        .status { margin-top: 10px; font-size: 14px; color: #94a3b8; }
     </style>
 </head>
 <body>
-    <h1>🤖 لوحة تحكم بوت التداول الذكي</h1>
+    <h1>🤖 لوحة تحكم بوت التداول الذكي (لايف)</h1>
     <div class="card">
         <h3>سعر البيتكوين الحالي (Bybit)</h3>
         <div id="price" class="price">جاري التحميل...</div>
         
         <h3>تحليل الذكاء الاصطناعي (AI)</h3>
         <div id="analysis" class="analysis">جاري جلب التحليل...</div>
+        
+        <div id="status" class="status">آخر تحديث: يتم التحميل...</div>
     </div>
 
     <script>
-        fetch('status.json')
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('price').innerText = "$" + data.price;
-                document.getElementById('analysis').innerText = data.analysis;
-            })
-            .catch(error => {
-                document.getElementById('price').innerText = "في انتظار أول تشغيل للبوت...";
-                document.getElementById('analysis').innerText = "لا توجد بيانات حالياً.";
-            });
+        function loadStatus() {
+            // إضافة رقم عشوائي ?t=... لمنع المتصفح من تخزين النسخة القديمة (Cache)
+            fetch('status.json?t=' + new Date().getTime())
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('price').innerText = "$" + data.price;
+                    document.getElementById('analysis').innerText = data.analysis;
+                    document.getElementById('status').innerText = "الحالة: " + data.status + " | الوقت: " + new Date().toLocaleTimeString();
+                })
+                .catch(error => {
+                    document.getElementById('price').innerText = "في انتظار أول تحديث...";
+                    document.getElementById('analysis').innerText = "لا توجد بيانات حالياً.";
+                });
+        }
+
+        // جلب البيانات فور فتح الصفحة
+        loadStatus();
+
+        // تحديث الصفحة أوتوماتيكياً كل 60 ثانية (لايف)
+        setInterval(loadStatus, 60000);
     </script>
 </body>
 </html>
