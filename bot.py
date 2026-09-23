@@ -1,27 +1,23 @@
 import os
 import json
+import time
 import requests
 
-# قراءة المفاتيح بأمان من GitHub Secrets
 BYBIT_API_KEY = os.getenv("BYBIT_API_KEY")
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 
 def get_bybit_price():
     try:
-        # استخدام رابط الـ Public Ticker المباشر والدقيق لـ Bybit Spot
-        url = "https://api.bybit.com/v5/market/tickers?category=spot&symbol=BTCUSDT"
+        url = "https://api.bybit.com/v5/market/tickers?category=linear&symbol=BTCUSDT"
         headers = {"User-Agent": "Mozilla/5.0"}
         response = requests.get(url, headers=headers)
         data = response.json()
-        
-        # التأكد من نجاح الطلب واستخراج السعر بدقة
-        if data.get("retCode") == 0:
+        if data.get("retCode") == 0 and len(data['result']['list']) > 0:
             price = data['result']['list'][0]['lastPrice']
             return float(price)
-        else:
-            return 0.0
+        return None
     except Exception as e:
-        return 0.0
+        return None
 
 def get_ai_analysis(price):
     try:
@@ -40,24 +36,33 @@ def get_ai_analysis(price):
         res_data = response.json()
         return res_data['choices'][0]['message']['content']
     except Exception as e:
-        return f"خطأ في التحليل الذكي: {str(e)}"
+        return "Error in AI analysis"
 
 if __name__ == "__main__":
-    print("جاري جلب البيانات من Bybit...")
-    btc_price = get_bybit_price()
-    print(f"السعر الحالي: {btc_price}")
-
-    print("جاري إرسال البيانات إلى OpenRouter AI للتحليل...")
-    analysis = get_ai_analysis(btc_price)
-    print(f"التحليل: {analysis}")
-
-    # حفظ النتائج في ملف status.json بالشكل الصحيح
-    status_data = {
-        "price": btc_price,
-        "analysis": analysis,
-        "status": "Running Successfully"
-    }
+    print("بدء تشغيل حلقة المراقبة لمدة مستمرة...")
     
-    with open("status.json", "w", encoding="utf-8") as f:
-        json.dump(status_data, f, ensure_ascii=False, indent=4)
-    print("تم تحديث ملف status.json بنجاح!")
+    # حساب مدة 6 ساعات بالثواني (6 * 3600 = 21600 ثانية)
+    end_time = time.time() + 6 * 3600
+    
+    while time.time() < end_time:
+        print("جاري جلب السعر من Bybit...")
+        btc_price = get_bybit_price()
+        
+        if btc_price:
+            print(f"السعر الحالي: {btc_price}")
+            analysis = get_ai_analysis(btc_price)
+            
+            status_data = {
+                "price": btc_price,
+                "analysis": analysis,
+                "status": "Running Continuously"
+            }
+            
+            with open("status.json", "w", encoding="utf-8") as f:
+                json.dump(status_data, f, ensure_ascii=False, indent=4)
+            print("تم تحديث status.json بنجاح!")
+        else:
+            print("فشل في جلب السعر، إعادة المحاولة...")
+
+        # الانتظار لمدة 5 دقائق (300 ثانية) قبل المراقبة الموالية
+        time.sleep(300)
