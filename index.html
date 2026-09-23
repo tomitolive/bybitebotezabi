@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة تحكم بوت التداول</title>
+    <style>
+        body { font-family: Tahoma, sans-serif; background: #0f172a; color: #f8fafc; padding: 20px; text-align: center; }
+        .card { background: #1e293b; padding: 20px; border-radius: 12px; max-width: 500px; margin: 20px auto; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        h1 { color: #38bdf8; }
+        .price { font-size: 24px; color: #4ade80; font-weight: bold; }
+        .analysis { background: #334155; padding: 15px; border-radius: 8px; margin-top: 15px; text-align: left; direction: ltr; }
+    </style>
+</head>
+<body>
+    <h1>🤖 لوحة تحكم بوت التداول الذكي</h1>
+    <div class="card">
+        <h3>سعر البيتكوين الحالي (Bybit)</h3>
+        <div id="price" class="price">جاري التحميل...</div>
+        
+        <h3>تحليل الذكاء الاصطناعي (AI)</h3>
+        <div id="analysis" class="analysis">جاري جلب التحليل...</div>
+    </div>
+
+    <script>
+        fetch('status.json')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('price').innerText = "$" + data.price;
+                document.getElementById('analysis').innerText = data.analysis;
+            })
+            .catch(error => {
+                document.getElementById('price').innerText = "في انتظار أول تشغيل للبوت...";
+                document.getElementById('analysis').innerText = "لا توجد بيانات حالياً.";
+            });
+    </script>
+</body>
+</html>
