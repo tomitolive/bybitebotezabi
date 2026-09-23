@@ -13,17 +13,22 @@ def main():
     try:
         log("Fetching data from Bybit API...")
         
-        # إضافة الـ Headers المطلوبة للمصادقة مع Bybit
+        # Headers متكاملة تحاكي متصفح حقيقي لتجاوز حظر CloudFront WAF
         headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+            "Accept": "application/json, text/plain, */*",
+            "Accept-Language": "en-US,en;q=0.9",
+            "Accept-Encoding": "gzip, deflate, br",
+            "Referer": "https://www.bybit.com/",
             "X-BAPI-API-KEY": BYBIT_API_KEY if BYBIT_API_KEY else "",
             "Content-Type": "application/json"
         }
         
-        # يمكنك تعديل الروابط حسب الحاجة
+        # طلب البيانات مع الـ Headers والـ Timeout
         response = requests.get("https://api.bybit.com/v5/market/time", headers=headers, timeout=10)
         
         if response.status_code == 200:
-            log("API request successful.")
+            log("API request successful!")
             data = response.json()
             log(f"Response data: {data}")
         else:
